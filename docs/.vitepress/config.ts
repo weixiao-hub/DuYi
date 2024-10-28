@@ -18,6 +18,7 @@ export default defineConfig({
           { text: 'Markdown Examples', link: '/markdown-examples' },
           { text: 'Runtime API Examples', link: '/api-examples' },
           { text: '01 HTML+CSS收官', link: '/01 HTML+CSS收官' },
+          { text: '03 JavaScript收官', link: '/03 JS收官' },
         ]
       }
     ],

@@ -1,43 +1,94 @@
 <script setup>
-import { ref } from 'vue'
+import {onMounted, ref} from 'vue'
 
 defineProps({
   msg: String,
 })
 
 const count = ref(0)
+const data = ref([]);
+const isLoading = ref(false);
+const page = ref(1);
+const container = ref(null);
+const visibleItems = ref([]);
+const sentinel = ref(null);
+
+async function fetchItems(page) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const newItems = Array.from({length: 10}, (v, k) => ({
+        id: page * 10 + k,
+        text: `item ${page * 10 + k}`
+      }));
+      resolve(newItems)
+    }, 1000)
+  })
+}
+
+async function loadMoreItems() {
+  if (isLoading.value) return;
+  isLoading.value = true;
+  const newItems = await fetchItems(page.value);
+  isLoading.value = false;
+  page.value++;
+  console.log(page.value)
+  data.value.push(...newItems);
+  updateVisibleItems();
+}
+
+function observeScroll() {
+  const options = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.1,
+  }
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+      loadMoreItems();
+    }
+  }, options);
+  observer.observe(sentinel.value)
+}
+
+function updateVisibleItems() {
+  const containerHeight = container.value.clientHeight;
+  // const scrollTop = container.value.scrollTop;
+  // visibleItems.value = data.value.filter((item, index) => {
+  //   const itemTop = index * 20 // 假设 每个item 高20px;
+  //   const itemBottom = itemTop + 20;
+  //   return itemTop >= scrollTop && itemBottom <= scrollTop + containerHeight;
+  // })
+  // console.log(data.value.length)
+  if(data.value.length * 20 < containerHeight) {
+    loadMoreItems();
+  }
+}
+
+onMounted(() => {
+  loadMoreItems();
+  observeScroll();
+})
 </script>
 
 <template>
-  <h1>{{ msg }}</h1>
-
-  <div class="card">
-    <button type="button" @click="count++">count is {{ count }}</button>
-    <p>
-      Edit
-      <code>components/HelloWorld.vue</code> to test HMR
-    </p>
+  <div class="header"></div>
+  <div class="container" ref="container" >
+    <template v-for="item in data" :key="item.id">
+      <div style="height: 20px">{{ item.text }}</div>
+    </template>
+    <div ref="sentinel" style="height: 1px;"></div>
   </div>
 
-  <p>
-    Check out
-    <a href="https://vuejs.org/guide/quick-start.html#local" target="_blank"
-      >create-vue</a
-    >, the official Vue + Vite starter
-  </p>
-  <p>
-    Learn more about IDE Support for Vue in the
-    <a
-      href="https://vuejs.org/guide/scaling-up/tooling.html#ide-support"
-      target="_blank"
-      >Vue Docs Scaling up Guide</a
-    >.
-  </p>
-  <p class="read-the-docs">Click on the Vite and Vue logos to learn more</p>
 </template>
 
 <style scoped>
-.read-the-docs {
-  color: #888;
+.header {
+  height: 50px;
+}
+
+.container {
+  overflow: scroll;
+  background-color: #cecece;
+  height: calc(100% - 50px);
 }
 </style>
