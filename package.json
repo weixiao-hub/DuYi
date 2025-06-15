@@ -7,11 +7,12 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "docs:dev": "vitepress dev docs",
+    "dev-d": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
+    "pinia": "^3.0.1",
     "vue": "^3.4.37"
   },
   "devDependencies": {
